@@ -3,6 +3,8 @@ package br.com.fiap.carrinho.model;
 import br.com.fiap.cliente.model.Cliente;
 import br.com.fiap.produto.model.Produto;
 import br.com.fiap.produto.model.ProdutoPerecivel;
+import jakarta.persistence.*;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,14 +12,31 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 
+@Entity
+@Table(name = "CARRINHO_CP3")
 public class Carrinho {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SQ_CARRINHO")
+    @SequenceGenerator(name = "SQ_CARRINHO", sequenceName = "SQ_CARRINHO", allocationSize = 1)
+    @Column(name = "ID_CARRINHO")
     private Long id;
+    @Column(name = "CRIACAO_CARRINHO")
     private LocalDateTime criacao = LocalDateTime.now();
+    @Column(name = "ENCERRAMENTO_CARRINHO")
     private LocalDateTime encerramento = criacao.plusHours(24);
+    @Column(name = "VALOR_TOTAL_CARRINHO")
     private double valorTotal;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "PRODUTO_CARRINHO",
+            joinColumns = @JoinColumn(name = "ID_CARRINHO"),
+            inverseJoinColumns = @JoinColumn(name = "PRODUTO_ID"))
     Collection<Produto> produtos = new LinkedHashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_CLIENTE", referencedColumnName = "ID_CLIENTE",
+            foreignKey = @ForeignKey(name = "FK_CARRINHO_CLIENTE", value = ConstraintMode.CONSTRAINT))
     private Cliente cliente;
 
     public Carrinho() {

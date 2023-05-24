@@ -8,6 +8,9 @@ import br.com.fiap.pessoa.model.PessoaFisica;
 import br.com.fiap.pessoa.model.Sexo;
 import br.com.fiap.produto.model.ProdutoPerecivel;
 import br.com.fiap.venda.model.Venda;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,12 +20,14 @@ public class Main {
 
     public static void main(String[] args) {
 
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory("oracle-fiap");
+        EntityManager manager = factory.createEntityManager();
+
         PessoaFisica chicoBento = new PessoaFisica();
         chicoBento.setSexo(Sexo.MASCULINO)
                 .setCPF(getCpf())
                 .setNome("Francisco Bento da Silva de Souza")
                 .setNascimento(LocalDate.now().minusYears(30));
-
 
         Fornecedor fazendeiro = new Fornecedor();
         fazendeiro.setPessoa(chicoBento);
@@ -34,7 +39,6 @@ public class Main {
         alface.setFornecedor(fazendeiro);
         alface.setDiasValidade(10);
         alface.setPreco(5);
-
 
         var brocolis = new ProdutoPerecivel();
         brocolis.setNome("Brocolis Ninja");
@@ -62,12 +66,16 @@ public class Main {
 
         Venda venda = new Venda();
         venda.setCarrinho(carrinho).setData(LocalDateTime.now());
-
         venda.setValor(carrinho.getValorTotal());
-
 
         System.out.println(venda);
 
+        manager.getTransaction().begin();
+        manager.persist(venda);
+        manager.getTransaction().commit();
+
+        manager.close();
+        factory.close();
     }
 
     private static String getCpf() {
